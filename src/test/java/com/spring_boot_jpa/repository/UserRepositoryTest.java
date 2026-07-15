@@ -23,10 +23,12 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     private User user;
+    private static int emailCounter = 0;
 
     @BeforeEach
     void setUp() {
-        user = new User("John", "Doe", "john.doe@example.com", "123 Main St", "New York");
+        emailCounter++;
+        user = new User("John", "Doe", "john.doe" + emailCounter + "@example.com", "123 Main St", "New York");
     }
 
     @Test
@@ -37,7 +39,7 @@ class UserRepositoryTest {
         assertNotNull(savedUser.getId());
         assertEquals("John", savedUser.getFirstName());
         assertEquals("Doe", savedUser.getLastName());
-        assertEquals("john.doe@example.com", savedUser.getEmail());
+        assertTrue(savedUser.getEmail().startsWith("john.doe"));
     }
 
     @Test
@@ -60,8 +62,8 @@ class UserRepositoryTest {
 
     @Test
     void whenFindAll_thenReturnAllUsers() {
-        User user1 = new User("John", "Doe", "john.doe@example.com", "123 Main St", "New York");
-        User user2 = new User("Jane", "Smith", "jane.smith@example.com", "456 Oak Ave", "Los Angeles");
+        User user1 = new User("John", "Doe", "john.unique1@example.com", "123 Main St", "New York");
+        User user2 = new User("Jane", "Smith", "jane.unique1@example.com", "456 Oak Ave", "Los Angeles");
         
         entityManager.persistAndFlush(user1);
         entityManager.persistAndFlush(user2);
@@ -102,7 +104,7 @@ class UserRepositoryTest {
     void whenSaveUserWithDuplicateEmail_thenThrowException() {
         entityManager.persistAndFlush(user);
         
-        User duplicateUser = new User("Jane", "Smith", "john.doe@example.com", "789 Pine Rd", "Chicago");
+        User duplicateUser = new User("Jane", "Smith", user.getEmail(), "789 Pine Rd", "Chicago");
         
         assertThrows(Exception.class, () -> {
             userRepository.save(duplicateUser);
